@@ -9,7 +9,7 @@ class YahooUser implements ResourceOwnerInterface
      * @var array
      */
     protected $response;
-    
+
 
     /**
      * @var image URL
@@ -21,18 +21,18 @@ class YahooUser implements ResourceOwnerInterface
      */
     public function __construct(array $response)
     {
-        $this->response = $response;
+        $this->response = $response['profile'];
     }
 
     public function getId()
     {
-        return $this->response['profile']['guid'];
+        return isset($this->response['guid']) ? $this->response['guid'] : null;
     }
 
     /**
      * Get perferred display name.
      *
-     * @return string
+     * @return string|null
      */
     public function getName()
     {
@@ -40,27 +40,42 @@ class YahooUser implements ResourceOwnerInterface
         nickname is not coming in the response.
         $this->response['profile']['nickname']
         */
-        return $this->getFirstName()." ".$this->getLastName();
+		$firstName = !is_null( $this->getFirstName() ) ? $this->getFirstName() : '';
+		$lastName = !is_null( $this->getLastName() ) ? $this->getLastName() : '';
+
+		$name = trim("$firstName $lastName");
+
+        return !( empty($name) ) ? $name : null;
+    }
+
+    /**
+     * Get nickname.
+     *
+     * @return string|null
+     */
+    public function getNickname()
+    {
+        return isset( $this->response['nickname'] ) ? $this->response['nickname'] : null;
     }
 
     /**
      * Get perferred first name.
      *
-     * @return string
+     * @return string|null
      */
     public function getFirstName()
     {
-        return $this->response['profile']['givenName'];
+        return isset( $this->response['givenName'] ) ? $this->response['givenName'] : null;
     }
 
     /**
      * Get perferred last name.
      *
-     * @return string
+     * @return string|null
      */
     public function getLastName()
     {
-        return $this->response['profile']['familyName'];
+        return isset( $this->response['familyName'] ) ? $this->response['familyName'] : null;
     }
 
     /**
@@ -70,9 +85,17 @@ class YahooUser implements ResourceOwnerInterface
      */
     public function getEmail()
     {
-        if (!empty($this->response['profile']['emails'])) {
-            return $this->response['profile']['emails'][0]['handle'];
-        }
+		return isset( $this->response['emails'] ) ? $this->response['emails'][0]['handle'] : null;
+    }
+
+    /**
+     * Get profile url.
+     *
+     * @return string|null
+     */
+    public function getLink()
+    {
+        return isset( $this->response['profileUrl'] ) ? $this->response['profileUrl'] : null;
     }
 
     /**
@@ -83,12 +106,6 @@ class YahooUser implements ResourceOwnerInterface
     public function getAvatar()
     {
         return $this->response['imageUrl'];
-    }
-
-    public function setImageURL($url)
-    {
-        $this->response['imageUrl'] = $url;
-        return $this;
     }
 
     /**
