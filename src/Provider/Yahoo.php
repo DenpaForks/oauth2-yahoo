@@ -10,6 +10,10 @@ use Psr\Http\Message\ResponseInterface;
 
 class Yahoo extends AbstractProvider
 {
+    use BearerAuthorizationTrait;
+
+    const ACCESS_TOKEN_RESOURCE_OWNER_ID = 'xoauth_yahoo_guid';
+
     /*
     https://developer.yahoo.com/oauth2/guide/flows_authcode/#step-2-get-an-authorization-url-and-authorize-access
     */
@@ -55,17 +59,9 @@ class Yahoo extends AbstractProvider
 
     protected function checkResponse(ResponseInterface $response, $data)
     {
-        if (!empty($data['error'])) {
+        if (isset($data['error']) && !empty($data['error'])) {
             $code  = 0;
-            $error = $data['error'];
-
-            if (is_array($error)) {
-            /*
-               No code is returned in the error
-            */
-                $code  = -1;
-                $error = $error['description'];
-            }
+            $error = $data['error_description'];
             throw new IdentityProviderException($error, $code, $data);
         }
     }
