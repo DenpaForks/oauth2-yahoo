@@ -105,7 +105,7 @@ class YahooUser implements ResourceOwnerInterface
      */
     public function getAvatar()
     {
-        return $this->response['imageUrl'];
+        return isset( $this->response['image'] ) ? $this->response['image']['imageUrl'] : null;
     }
 
     /**
